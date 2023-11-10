@@ -59,7 +59,7 @@ uint32_t MCTS::select_best_child(uint32_t node_index) {
                 if (new_row < 0 || new_row >= BOARD_HEIGHT || new_col < 0 || new_col >= BOARD_WIDTH) continue;
                 if (new_row == child_node.last_move.row && new_col == child_node.last_move.col) continue;
 
-                if (test_position.board[new_row][new_col] != EMPTY) {
+                if (!test_position.is_empty(new_row, new_col)) {
                     int current_distance = std::max(abs(r), abs(c));
                     if (current_distance < best_distance) {
                         best_distance = current_distance;
@@ -166,7 +166,7 @@ int MCTS::simulation(uint32_t node_index) {
                     NO_MOVE;
 
         if (last_move.row == BOARD_HEIGHT && last_move.col == BOARD_WIDTH) {
-            std::vector<Move> moves = current_board.get_adjacent_moves(adjacency_range);
+            std::vector<Move> moves = current_board.get_direct_adjacent_moves();
             if (moves.empty()) {
                 current_result = DRAW_SCORE;
                 break;

@@ -6,16 +6,42 @@
 #include "position.h"
 
 
+bool Position::is_empty(uint16_t row, uint16_t col) {
+    return board[row][col] == EMPTY || board[row][col] == ADJACENT;
+}
+
 void Position::make_move(Move move) {
     board[move.row][move.col] = side;
     side ^= 1;
+
+    for (Increment increment : TRAVERSAL_INCREMENTS) {
+        int new_row = move.row + increment.row;
+        int new_col = move.col + increment.col;
+        if (new_row < 0 || new_row >= BOARD_HEIGHT || new_col < 0 || new_col >= BOARD_WIDTH) continue;
+        if (board[new_row][new_col] != EMPTY) continue;
+
+        board[new_row][new_col] = ADJACENT;
+    }
 }
 
 std::vector<Move> Position::get_moves() {
     std::vector<Move> moves;
     for (uint16_t row = 0; row < BOARD_HEIGHT; row++) {
         for (uint16_t col = 0; col < BOARD_WIDTH; col++) {
-            if (board[row][col] == EMPTY) {
+            if (is_empty(row, col)) {
+                moves.push_back(Move{row=row, col=col});
+            }
+        }
+    }
+
+    return moves;
+}
+
+std::vector<Move> Position::get_direct_adjacent_moves() {
+    std::vector<Move> moves;
+    for (uint16_t row = 0; row < BOARD_HEIGHT; row++) {
+        for (uint16_t col = 0; col < BOARD_WIDTH; col++) {
+            if (board[row][col] == ADJACENT) {
                 moves.push_back(Move{row=row, col=col});
             }
         }
@@ -29,7 +55,7 @@ std::vector<Move> Position::get_adjacent_moves(int adjacency_range) {
 
     for (uint16_t row = 0; row < BOARD_HEIGHT; row++) {
         for (uint16_t col = 0; col < BOARD_WIDTH; col++) {
-            if (board[row][col] == EMPTY) {
+            if (is_empty(row, col)) {
                 bool is_adjacent = false;
                 for (int r = -adjacency_range; r <= adjacency_range; r++) {
                     for (int c = -adjacency_range; c <= adjacency_range; c++) {
@@ -39,7 +65,7 @@ std::vector<Move> Position::get_adjacent_moves(int adjacency_range) {
 
                         // if (new_row == row && new_col == col) continue; NO NEED TO CHECK
 
-                        if (board[new_row][new_col] != EMPTY) {
+                        if (!is_empty(new_row, new_col)) {
                             is_adjacent = true;
                             break;
                         }
@@ -76,7 +102,7 @@ void Position::ray_threats(Threats& threats, int color, uint16_t row, uint16_t c
         if (new_row < 0 || new_row >= BOARD_HEIGHT || new_col < 0 || new_col >= BOARD_WIDTH) break;
 
         if (board[new_row][new_col] == !color) break;
-        if (board[new_row][new_col] == EMPTY) { empty_end = true; break; }
+        if (is_empty(new_row, new_col)) { empty_end = true; break; }
         count++;
     }
 
@@ -90,7 +116,7 @@ void Position::ray_threats(Threats& threats, int color, uint16_t row, uint16_t c
         if (new_row < 0 || new_row >= BOARD_HEIGHT || new_col < 0 || new_col >= BOARD_WIDTH) break;
 
         if (board[new_row][new_col] == !color) break;
-        if (board[new_row][new_col] == EMPTY) { opposite_empty_end = true; break; }
+        if (is_empty(new_row, new_col)) { opposite_empty_end = true; break; }
         opposite_count++;
     }
 
@@ -108,7 +134,7 @@ void Position::get_square_threats(Threats& threats, uint16_t row, uint16_t col) 
 void Position::get_threats(Threats& threats) {
     for (uint16_t row = 0; row < BOARD_HEIGHT; row++) {
         for (uint16_t col = 0; col < BOARD_WIDTH; col++) {
-            if (board[row][col] == EMPTY) {
+            if (is_empty(row, col)) {
                 get_square_threats(threats, row, col);
             }
         }
@@ -190,8 +216,11 @@ void Position::visualize_moves(const std::vector<Move>& moves) {
     std::string string = "  ";
     int max_digits = static_cast<int>(std::max(std::to_string(BOARD_HEIGHT).length(), std::to_string(BOARD_WIDTH).length()));
 
+    std::vector<std::pair<Move, int>> replacement{};
+
     for (Move move : moves) {
-       board[move.row][move.col] = VISUAL;
+        replacement.emplace_back(move, board[move.row][move.col]);
+        board[move.row][move.col] = VISUAL;
     }
 
     for (int col = 0; col < BOARD_WIDTH; col++) {
@@ -228,8 +257,10 @@ void Position::visualize_moves(const std::vector<Move>& moves) {
         string += "\n";
     }
 
-    for (Move move : moves) {
-        board[move.row][move.col] = EMPTY;
+    for (std::pair<Move, int> replace : replacement) {
+        Move move = replace.first;
+        int replace_value = replace.second;
+        board[move.row][move.col] = replace_value;
     }
 
     std::cout << string;

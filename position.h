@@ -21,7 +21,10 @@ class Position {
 public:
 
     void make_move(Move move);
+    bool is_empty(uint16_t row, uint16_t col);
+
     std::vector<Move> get_moves();
+    std::vector<Move> get_direct_adjacent_moves();
     std::vector<Move> get_adjacent_moves(int adjacency_range);
 
     void ray_threats(Threats& threats, int color, uint16_t row, uint16_t col, Increment increment);
