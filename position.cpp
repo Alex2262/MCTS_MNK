@@ -134,7 +134,7 @@ void Position::get_square_threats(Threats& threats, uint16_t row, uint16_t col) 
 void Position::get_threats(Threats& threats) {
     for (uint16_t row = 0; row < BOARD_HEIGHT; row++) {
         for (uint16_t col = 0; col < BOARD_WIDTH; col++) {
-            if (is_empty(row, col)) {
+            if (board[row][col] == ADJACENT) {
                 get_square_threats(threats, row, col);
             }
         }
