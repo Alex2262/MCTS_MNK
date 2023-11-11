@@ -101,7 +101,7 @@ uint32_t MCTS::select_best_child(uint32_t node_index) {
         Node child_node = tree.graph[child_node_index];
 
         double exploitation_value = static_cast<double>(child_node.win_count) / static_cast<double>(child_node.total_nodes);
-        double exploration_value = EXPLORATION_CONSTANT * std::sqrt(std::log(node.total_nodes) / child_node.total_nodes);
+        double exploration_value = EXPLORATION_CONSTANT * std::sqrt(node.total_nodes) / (1 + child_node.total_nodes);
 
         double puct = exploitation_value + exploration_value * policies[i];
 
