@@ -10,7 +10,7 @@
 
 
 double MCTS::get_win_probability(uint32_t node_index) {
-    double win_ratio = static_cast<double>(tree.graph[node_index].win_count) / tree.graph[node_index].total_nodes;
+    double win_ratio = static_cast<double>(tree.graph[node_index].win_count) / tree.graph[node_index].visits;
     int win_side = (win_ratio > 0) - (win_ratio < 0);
 
     win_ratio = win_side * (std::pow(abs(win_ratio) + 0.03, 0.71) - 0.1 + 0.2 * abs(win_ratio));
@@ -22,9 +22,9 @@ double MCTS::get_win_probability(uint32_t node_index) {
 
 /*
  * UCT FORMULA
-double exploitation_value = double(child_node.win_count) / child_node.total_nodes;
-double exploration_value = sqrt(std::log(tree.graph[current_node_index].total_nodes)
-        / child_node.total_nodes);
+double exploitation_value = double(child_node.win_count) / child_node.visits;
+double exploration_value = sqrt(std::log(tree.graph[current_node_index].visits)
+        / child_node.visits);
 
 double uct_value = exploitation_value + EXPLORATION_CONSTANT * exploration_value;
 
@@ -100,8 +100,8 @@ uint32_t MCTS::select_best_child(uint32_t node_index) {
         uint32_t child_node_index = tree.graph[node_index].children_start + i;
         Node child_node = tree.graph[child_node_index];
 
-        double exploitation_value = static_cast<double>(child_node.win_count) / static_cast<double>(child_node.total_nodes);
-        double exploration_value = EXPLORATION_CONSTANT * std::sqrt(node.total_nodes) / (1 + child_node.total_nodes);
+        double exploitation_value = static_cast<double>(child_node.win_count) / static_cast<double>(child_node.visits);
+        double exploration_value = EXPLORATION_CONSTANT * std::sqrt(node.visits) / (1 + child_node.visits);
 
         double puct = exploitation_value + exploration_value * policies[i];
 
@@ -144,7 +144,7 @@ void MCTS::expansion(uint32_t node_index) {
     tree.graph[node_index].children_end = tree.graph.size();
 }
 
-int MCTS::simulation(uint32_t node_index) {
+void MCTS::simulation(uint32_t node_index, int thread_id) {
     Position current_board = test_position;
 
     Move last_move = tree.graph[node_index].last_move;
@@ -155,7 +155,7 @@ int MCTS::simulation(uint32_t node_index) {
         current_result = current_board.get_result(last_move);
         if (current_result != NO_SCORE) break;
 
-        int adjacency_range = 1;
+        // int adjacency_range = 1;
 
         Threats threats{};
         current_board.get_threats(threats);
@@ -179,7 +179,7 @@ int MCTS::simulation(uint32_t node_index) {
 
     if (current_result == NO_SCORE) current_result = DRAW_SCORE;
 
-    return current_result;
+    simulation_results[thread_id] = current_result;
 }
 
 void MCTS::back_propagation(uint32_t node_index, int result) {
@@ -189,7 +189,7 @@ void MCTS::back_propagation(uint32_t node_index, int result) {
     while (true) {
         Node& current_node = tree.graph[current_node_index];
 
-        current_node.total_nodes++;
+        current_node.visits++;
         if (current_side == result) current_node.win_count++;
         else if ((current_side ^ 1) == result) current_node.win_count--;
 
@@ -209,8 +209,8 @@ uint32_t MCTS::get_best_node() {
     uint32_t best_index = 0;
     for (int i = 0; i < tree.graph[root_node_index].children_end - tree.graph[root_node_index].children_start; i++) {
         Node& node = tree.graph[tree.graph[root_node_index].children_start + i];
-        if (node.total_nodes >= best) {
-            best = node.total_nodes;
+        if (node.visits >= best) {
+            best = node.visits;
             best_index = tree.graph[root_node_index].children_start + i;
         }
     }
@@ -228,7 +228,7 @@ uint32_t MCTS::search() {
 
         uint32_t selected_node_index = selection();
 
-        tree.graph[selected_node_index].visits++;
+        // tree.graph[selected_node_index].visits++;
 
         int node_result = test_position.get_result(tree.graph[selected_node_index].last_move);
         if (node_result == NO_SCORE && tree.graph[selected_node_index].visits >= 2) {
@@ -242,9 +242,25 @@ uint32_t MCTS::search() {
             }
         }
 
-        int simulation_result = node_result == NO_SCORE ? simulation(selected_node_index) : node_result;
+        if (node_result == NO_SCORE) {
 
-        back_propagation(selected_node_index, simulation_result);
+            for (int thread_id = 0; thread_id < THREADS; thread_id++) {
+                simulation_results[thread_id] = NO_SCORE;
+                simulation_threads[thread_id] = std::thread([this, selected_node_index, thread_id](){
+                    this->simulation(selected_node_index, thread_id);
+                });
+            }
+
+            for (int thread_id = 0; thread_id < THREADS; thread_id++) {
+                simulation_threads[thread_id].join();
+                back_propagation(selected_node_index, simulation_results[thread_id]);
+            }
+
+        } else {
+            for (int t_simulation = 0; t_simulation < THREADS; t_simulation++) {
+                back_propagation(selected_node_index, node_result);
+            }
+        }
 
         if ((iteration & 1023) == 0) {
             auto time = std::chrono::high_resolution_clock::now();

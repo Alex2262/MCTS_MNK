@@ -37,7 +37,7 @@ int main() {
             std::cout << std::endl
                       << "Total Iterations: \t" << CYAN << mcts.iterations << RESET << "\n"
                       << "Score: \t\t\t\t"      << CYAN << best_node.win_count << RESET << "\n"
-                      << "Visits: \t\t\t"       << CYAN << best_node.total_nodes << RESET << "\n"
+                      << "Visits: \t\t\t"       << CYAN << best_node.visits << RESET << "\n"
                       << "Confidence: \t\t"     << win_probability_color << win_probability << "%\n" << RESET
                       << "Seldepth: \t\t\t"     << CYAN << mcts.seldepth << RESET << "\n"
                       << "Time: \t\t\t\t"       << CYAN << elapsed_time << RESET << "\n"

@@ -14,12 +14,13 @@
 typedef uint16_t PLY_TYPE;
 
 constexpr uint64_t MAX_ITERATIONS = 10000000;
-constexpr uint64_t MAX_TIME = 15000;
+constexpr uint64_t MAX_TIME = 6000;
 constexpr double EXPLORATION_CONSTANT = 1.41;
 
 constexpr int BOARD_HEIGHT = 15;
 constexpr int BOARD_WIDTH = 15;
 constexpr int WIN_AMT = 5;
+constexpr int THREADS = 7;
 
 constexpr PLY_TYPE MAX_SIMULATION_DEPTH = WIN_AMT * WIN_AMT + 9;
 
