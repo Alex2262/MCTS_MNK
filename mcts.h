@@ -8,6 +8,7 @@
 #include <thread>
 #include "constants.h"
 #include "position.h"
+#include "fixed_vector.h"
 
 class Node {
 public:
@@ -53,6 +54,7 @@ public:
 
     std::array<State, MAX_DEPTH> state_stack{};
     std::array<Position, THREADS> test_positions{};
+    std::array<FixedVector<Move, MAX_MOVES>, THREADS> move_vectors{};
 
     double get_win_probability(uint32_t node_index);
     void descend_to_root(uint32_t node_index);

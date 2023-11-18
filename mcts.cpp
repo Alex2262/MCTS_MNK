@@ -144,9 +144,9 @@ uint32_t MCTS::selection() {
 }
 
 void MCTS::expansion(uint32_t node_index) {
-    std::vector<Move> moves = position.get_moves();
+    position.get_moves(move_vectors[0]);
     tree.graph[node_index].children_start = tree.graph.size();
-    for (Move move : moves) {
+    for (Move move : move_vectors[0]) {
         tree.graph.emplace_back(node_index, move);
     }
     tree.graph[node_index].children_end = tree.graph.size();
@@ -182,12 +182,12 @@ void MCTS::simulation(uint32_t node_index, int thread_id) {
                     NO_MOVE;
 
         if (last_move.row == BOARD_HEIGHT && last_move.col == BOARD_WIDTH) {
-            std::vector<Move> moves = current_position->get_direct_adjacent_moves();
-            if (moves.empty()) {
+            current_position->get_direct_adjacent_moves(move_vectors[thread_id]);
+            if (move_vectors[thread_id].empty()) {
                 current_result = DRAW_SCORE;
                 break;
             }
-            last_move = moves[rand() % moves.size()];
+            last_move = move_vectors[thread_id][rand() % move_vectors[thread_id].size()];
         }
 
         current_position->make_move<MOVE_ADJACENCY>(last_move);

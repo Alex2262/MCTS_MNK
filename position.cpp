@@ -10,8 +10,8 @@ bool Position::is_empty(uint16_t row, uint16_t col) {
     return board[row][col] == EMPTY || board[row][col] == ADJACENT;
 }
 
-std::vector<Move> Position::get_moves() {
-    std::vector<Move> moves;
+void Position::get_moves(FixedVector<Move, MAX_MOVES>& moves) {
+    moves.clear();
     for (uint16_t row = 0; row < BOARD_HEIGHT; row++) {
         for (uint16_t col = 0; col < BOARD_WIDTH; col++) {
             if (is_empty(row, col)) {
@@ -19,12 +19,10 @@ std::vector<Move> Position::get_moves() {
             }
         }
     }
-
-    return moves;
 }
 
-std::vector<Move> Position::get_direct_adjacent_moves() {
-    std::vector<Move> moves;
+void Position::get_direct_adjacent_moves(FixedVector<Move, MAX_MOVES>& moves) {
+    moves.clear();
     for (uint16_t row = 0; row < BOARD_HEIGHT; row++) {
         for (uint16_t col = 0; col < BOARD_WIDTH; col++) {
             if (board[row][col] == ADJACENT) {
@@ -32,8 +30,6 @@ std::vector<Move> Position::get_direct_adjacent_moves() {
             }
         }
     }
-
-    return moves;
 }
 
 std::vector<Move> Position::get_adjacent_moves(int adjacency_range) {

@@ -8,6 +8,12 @@
 #include "constants.h"
 #include "position.h"
 
-uint64_t perft(Position& position, PLY_TYPE depth);
+class PerftEngine {
+    FixedVector<Move, MAX_MOVES> moves;
+public:
+    uint64_t perft(Position& position, PLY_TYPE depth);
+};
+
+
 
 #endif //MCTS_MNK_PERFT_H

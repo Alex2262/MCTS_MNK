@@ -6,6 +6,7 @@
 #define MCTS_MNK_POSITION_H
 
 #include "constants.h"
+#include "fixed_vector.h"
 #include <vector>
 #include <unordered_set>
 
@@ -27,8 +28,8 @@ public:
 
     bool is_empty(uint16_t row, uint16_t col);
 
-    std::vector<Move> get_moves();
-    std::vector<Move> get_direct_adjacent_moves();
+    void get_moves(FixedVector<Move, MAX_MOVES>& moves);
+    void get_direct_adjacent_moves(FixedVector<Move, MAX_MOVES>& moves);
     std::vector<Move> get_adjacent_moves(int adjacency_range);
 
     void ray_threats(Threats& threats, int color, uint16_t row, uint16_t col, Increment increment);

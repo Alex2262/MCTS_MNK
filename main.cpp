@@ -5,6 +5,7 @@
 
 int main() {
     MCTS mcts{};
+    PerftEngine perft_engine{};
     mcts.tree.graph.emplace_back(0, NO_MOVE);
 
     mcts.position.print_board();
@@ -15,7 +16,7 @@ int main() {
         std::vector <std::string> tokens = split(msg, ' ');
 
         if (tokens[0] == "perft") {
-            std::cout << perft(mcts.position, 4);
+            std::cout << perft_engine.perft(mcts.position, 4);
         }
 
         if (tokens[0] == "go") {
@@ -101,7 +102,8 @@ int main() {
             break;
         }
 
-        if (mcts.position.get_moves().empty()) {
+        mcts.position.get_moves(mcts.move_vectors[0]);
+        if (mcts.move_vectors[0].empty()) {
             std::cout << "DRAW" << std::endl;
             break;
         }
