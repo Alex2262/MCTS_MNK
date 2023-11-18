@@ -1,5 +1,6 @@
 #include <iostream>
 #include "mcts.h"
+#include "perft.h"
 
 
 int main() {
@@ -12,6 +13,10 @@ int main() {
     while (getline(std::cin, msg)) {
 
         std::vector <std::string> tokens = split(msg, ' ');
+
+        if (tokens[0] == "perft") {
+            std::cout << perft(mcts.position, 4);
+        }
 
         if (tokens[0] == "go") {
             auto time = std::chrono::high_resolution_clock::now();
@@ -49,7 +54,7 @@ int main() {
             std::cout << "best move [" << CYAN << best_move.row << ", " << best_move.col << RESET << "]"
                       << std::endl << std::endl;
 
-            mcts.position.make_move(best_move);
+            mcts.position.make_move<MOVE_ADJACENCY>(best_move);
             mcts.position.print_board();
 
             mcts.root_node_index = best_node_index;
@@ -60,7 +65,7 @@ int main() {
         if (tokens[0] == "move") {
             Move sent_move = Move{static_cast<uint16_t>(std::stoi(tokens[1])),
                                   static_cast<uint16_t>(std::stoi(tokens[2]))};
-            mcts.position.make_move(sent_move);
+            mcts.position.make_move<MOVE_ADJACENCY>(sent_move);
             std::cout << std::endl;
 
             mcts.position.print_board();

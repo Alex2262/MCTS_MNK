@@ -14,15 +14,16 @@
 typedef uint16_t PLY_TYPE;
 
 constexpr uint64_t MAX_ITERATIONS = 10000000;
-constexpr uint64_t MAX_TIME = 6000;
+constexpr uint64_t MAX_TIME = 5000;
 constexpr double EXPLORATION_CONSTANT = 1.41;
 
 constexpr int BOARD_HEIGHT = 15;
 constexpr int BOARD_WIDTH = 15;
 constexpr int WIN_AMT = 5;
-constexpr int THREADS = 7;
+constexpr int THREADS = 1;
 
 constexpr PLY_TYPE MAX_SIMULATION_DEPTH = WIN_AMT * WIN_AMT + 9;
+constexpr PLY_TYPE MAX_DEPTH = MAX_SIMULATION_DEPTH + 256;
 
 constexpr int WHITE  = 0;
 constexpr int BLACK  = 1;
@@ -32,6 +33,9 @@ constexpr int ADJACENT = 4;
 
 constexpr int DRAW_SCORE = 2;
 constexpr int NO_SCORE = 3;
+
+constexpr bool MOVE_ADJACENCY = true;
+constexpr bool NO_MOVE_ADJACENCY = false;
 
 const std::string RESET  = "\033[0m";
 const std::string RED    = "\033[31m";

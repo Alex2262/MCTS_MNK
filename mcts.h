@@ -39,10 +39,10 @@ public:
     Threats current_threats{};
 
     Position position{};
-    Position test_position{};
 
     uint64_t start_time = 0;
     PLY_TYPE seldepth = 0;
+    PLY_TYPE ply = 0;
     int iterations = 0;
     int simulation_results[THREADS]{};
     std::thread simulation_threads[THREADS]{};
@@ -51,7 +51,12 @@ public:
 
     Tree tree{};
 
+    std::array<State, MAX_DEPTH> state_stack{};
+    std::array<Position, THREADS> test_positions{};
+
     double get_win_probability(uint32_t node_index);
+    void descend_to_root(uint32_t node_index);
+
     uint32_t select_best_child(uint32_t node_index);
     uint32_t selection();
     void expansion(uint32_t node_index);

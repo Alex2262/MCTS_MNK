@@ -10,20 +10,6 @@ bool Position::is_empty(uint16_t row, uint16_t col) {
     return board[row][col] == EMPTY || board[row][col] == ADJACENT;
 }
 
-void Position::make_move(Move move) {
-    board[move.row][move.col] = side;
-    side ^= 1;
-
-    for (Increment increment : TRAVERSAL_INCREMENTS) {
-        int new_row = move.row + increment.row;
-        int new_col = move.col + increment.col;
-        if (new_row < 0 || new_row >= BOARD_HEIGHT || new_col < 0 || new_col >= BOARD_WIDTH) continue;
-        if (board[new_row][new_col] != EMPTY) continue;
-
-        board[new_row][new_col] = ADJACENT;
-    }
-}
-
 std::vector<Move> Position::get_moves() {
     std::vector<Move> moves;
     for (uint16_t row = 0; row < BOARD_HEIGHT; row++) {
